@@ -30,6 +30,7 @@ const categories = [
 function Storefront() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const selectedCategory = selected === null ? undefined : categories[selected];
   const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (selected === null) return;
@@ -93,6 +94,6 @@ function Storefront() {
       <section id="visit" className="visit-section page-width"><MapPin size={28} strokeWidth={1.4} /><div><div className="eyebrow">ЩЕ СЕ РАДВАМЕ ДА ВИ ВИДИМ</div><h2>Вашето следващо вкусно откритие.</h2><p>Заповядайте в АНЕЛ 007 и изберете нещо хубаво за дома.</p></div><Button variant="deli" onClick={() => scrollTo('products')}>Изберете своя вкус <ArrowRight /></Button></section>
     </main>
     <footer className="page-width"><a className="footer-brand" href="#">АНЕЛ 007</a><span>Добрият вкус. Близо до дома.</span><small>© 2026 АНЕЛ 007</small></footer>
-    {selected !== null && <div className="catalog-overlay" onClick={() => setSelected(null)}><section ref={dialogRef} className="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalog-title" onClick={e => e.stopPropagation()}><Button variant="ghost" size="icon" className="dialog-close" aria-label="Затвори" onClick={() => setSelected(null)} autoFocus><X /></Button><img src={categories[selected].image} alt={categories[selected].title} width={480} height={768} /><div className="catalog-copy"><div className="eyebrow">НАШАТА СЕЛЕКЦИЯ</div><h2 id="catalog-title">{categories[selected].title}</h2><p>{categories[selected].label}</p><ul>{categories[selected].items.map(item => <li key={item}><Check size={17} />{item}</li>)}</ul><p className="catalog-note">Попитайте на място за текущия асортимент и наличности.</p><Button variant="deli" onClick={() => { setSelected(null); scrollTo('visit'); }}>Заповядайте при нас <ArrowUpRight /></Button></div></section></div>}
+    {selectedCategory && <div className="catalog-overlay" onClick={() => setSelected(null)}><section ref={dialogRef} className="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalog-title" onClick={e => e.stopPropagation()}><Button variant="ghost" size="icon" className="dialog-close" aria-label="Затвори" onClick={() => setSelected(null)} autoFocus><X /></Button><img src={selectedCategory.image} alt={selectedCategory.title} width={480} height={768} /><div className="catalog-copy"><div className="eyebrow">НАШАТА СЕЛЕКЦИЯ</div><h2 id="catalog-title">{selectedCategory.title}</h2><p>{selectedCategory.label}</p><ul>{selectedCategory.items.map(item => <li key={item}><Check size={17} />{item}</li>)}</ul><p className="catalog-note">Попитайте на място за текущия асортимент и наличности.</p><Button variant="deli" onClick={() => { setSelected(null); scrollTo('visit'); }}>Заповядайте при нас <ArrowUpRight /></Button></div></section></div>}
   </div>;
 }
