@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, ArrowRight, Leaf, Heart, ShieldCheck, Menu, X, Wheat, MapPin, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import hero from '@/assets/deli-hero.jpg';
@@ -30,6 +30,24 @@ const categories = [
 function Storefront() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (selected === null) return;
+    const previousFocus = document.activeElement;
+    document.body.style.overflow = 'hidden';
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelected(null);
+      if (event.key !== 'Tab') return;
+      const controls = dialogRef.current?.querySelectorAll<HTMLButtonElement>('button');
+      if (!controls?.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handleKey); if (previousFocus instanceof HTMLElement) previousFocus.focus(); };
+  }, [selected]);
   const scrollTo = (id: string) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); };
   return <div className="storefront">
     <div className="announcement"><Leaf size={13} /> Добрият вкус е близо до вас <span>·</span> Вашият квартален магазин</div>
@@ -75,6 +93,6 @@ function Storefront() {
       <section id="visit" className="visit-section page-width"><MapPin size={28} strokeWidth={1.4} /><div><div className="eyebrow">ЩЕ СЕ РАДВАМЕ ДА ВИ ВИДИМ</div><h2>Вашето следващо вкусно откритие.</h2><p>Заповядайте в АНЕЛ 007 и изберете нещо хубаво за дома.</p></div><Button variant="deli" onClick={() => scrollTo('products')}>Изберете своя вкус <ArrowRight /></Button></section>
     </main>
     <footer className="page-width"><a className="footer-brand" href="#">АНЕЛ 007</a><span>Добрият вкус. Близо до дома.</span><small>© 2026 АНЕЛ 007</small></footer>
-    {selected !== null && <div className="catalog-overlay" onClick={() => setSelected(null)}><section className="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalog-title" onClick={e => e.stopPropagation()}><Button variant="ghost" size="icon" className="dialog-close" aria-label="Затвори" onClick={() => setSelected(null)} autoFocus><X /></Button><img src={categories[selected].image} alt={categories[selected].title} width={480} height={768} /><div className="catalog-copy"><div className="eyebrow">НАШАТА СЕЛЕКЦИЯ</div><h2 id="catalog-title">{categories[selected].title}</h2><p>{categories[selected].label}</p><ul>{categories[selected].items.map(item => <li key={item}><Check size={17} />{item}</li>)}</ul><p className="catalog-note">Попитайте на място за текущия асортимент и наличности.</p><Button variant="deli" onClick={() => { setSelected(null); scrollTo('visit'); }}>Заповядайте при нас <ArrowUpRight /></Button></div></section></div>}
+    {selected !== null && <div className="catalog-overlay" onClick={() => setSelected(null)}><section ref={dialogRef} className="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalog-title" onClick={e => e.stopPropagation()}><Button variant="ghost" size="icon" className="dialog-close" aria-label="Затвори" onClick={() => setSelected(null)} autoFocus><X /></Button><img src={categories[selected].image} alt={categories[selected].title} width={480} height={768} /><div className="catalog-copy"><div className="eyebrow">НАШАТА СЕЛЕКЦИЯ</div><h2 id="catalog-title">{categories[selected].title}</h2><p>{categories[selected].label}</p><ul>{categories[selected].items.map(item => <li key={item}><Check size={17} />{item}</li>)}</ul><p className="catalog-note">Попитайте на място за текущия асортимент и наличности.</p><Button variant="deli" onClick={() => { setSelected(null); scrollTo('visit'); }}>Заповядайте при нас <ArrowUpRight /></Button></div></section></div>}
   </div>;
 }
